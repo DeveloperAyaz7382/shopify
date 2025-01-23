@@ -37,6 +37,7 @@ class User(Base):
     )
 
 # Media Model
+
 class Media(Base):
     __tablename__ = 'media'
 
