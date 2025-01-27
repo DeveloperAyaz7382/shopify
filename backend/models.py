@@ -1,11 +1,14 @@
 from decimal import Decimal
-from sqlalchemy import DECIMAL, CheckConstraint, Column, BigInteger, String, Numeric, Boolean, Integer, ForeignKey, DateTime, JSON, UUID
+from typing import Text
+from sqlalchemy import DECIMAL, CheckConstraint, Column, BigInteger, LargeBinary, String, Numeric, Boolean, Integer, ForeignKey, DateTime, JSON, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 import enum
 import uuid
+from sqlalchemy import Text
+
 
 Base = declarative_base()
 
@@ -39,27 +42,17 @@ class User(Base):
 # Media Model
 
 class Media(Base):
-    __tablename__ = 'media'
-
-    id = Column(BigInteger, primary_key=True, index=True)
-    model_type = Column(String(255), nullable=False)
-    model_id = Column(BigInteger, nullable=False)
-    uuid = Column(UUID, unique=True, default=uuid.uuid4, nullable=False)
-    collection_name = Column(String(255), nullable=False)
-    name = Column(String(255), nullable=False)
-    file_name = Column(String(255), nullable=False)
-    mime_type = Column(String(255), nullable=True)
-    disk = Column(String(255), nullable=False)
-    conversions_disk = Column(String(255), nullable=True)
-    size = Column(BigInteger, nullable=False)
-    manipulations = Column(JSON, nullable=False)
-    custom_properties = Column(JSON, nullable=False)
-    generated_conversions = Column(JSON, nullable=False)
-    responsive_images = Column(JSON, nullable=False)
-    order_column = Column(Integer, nullable=True)
-    created_at = Column(DateTime(timezone=False), default=func.now())
-    updated_at = Column(DateTime(timezone=False), default=func.now(), onupdate=func.now())
-
+    __tablename__ = "media"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String, index=True)
+    file_url = Column(Text, index=True)
+    file_size = Column(Integer)
+    file_type = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)  
+    
+    
+    
 # Product Model
 class Product(Base):
     __tablename__ = 'products'

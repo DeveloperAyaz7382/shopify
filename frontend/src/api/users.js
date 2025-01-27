@@ -12,6 +12,18 @@ export const createUser = async (user) => {
   return response.data;
 };
 
+
+export const updateUser = async (userId, user) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/${userId}`, user);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating user with ID ${userId}:`, error.message);
+    throw error;
+  }
+};
+
+
 export const deleteUser = async (userId) => {
   await axios.delete(`${API_BASE_URL}/users/${userId}`);
 };
