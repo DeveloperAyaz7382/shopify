@@ -7,8 +7,6 @@ import enum
 
 
 
-
-
 # User Schemas
 class UserCreate(BaseModel):
     first_name: str
@@ -66,49 +64,48 @@ class ProductStatus(str, enum.Enum):
     ACTIVE = 'Active'
     DRAFT = 'Draft'
 
+class ProductBase(BaseModel):
+    name: str
+    description: Optional[str]
+    short_description: Optional[str]
+    price: Optional[Decimal]
+    cost: Optional[Decimal]
+    quantity: Optional[int]
+    sku: Optional[str]
+    slug: Optional[str]
+    seo_title: Optional[str]
+    seo_description: Optional[str]
+    status: Optional[str] = "Draft"
 
-# # Product Schemas
-# class ProductBase(BaseModel):
-#     name: str
-#     description: Optional[str] = None
-#     short_description: Optional[str] = None
-#     price: Decimal
-#     cost: Optional[Decimal] = None
-#     quantity: int
-#     sku: str
-#     slug: str
-#     seo_title: Optional[str] = None
-#     seo_description: Optional[str] = None
-#     status: ProductStatus = ProductStatus.DRAFT
+class Product(ProductBase):
+    id: int
+    created_at: str  # String format for datetime
+    updated_at: str  # String format for datetime
+    
+class ProductCreate(ProductBase):
+    pass  # Inherit fields from ProductBase
 
-#     @root_validator(pre=True)
-#     def convert_decimal(cls, values):
-#         for field in ['price', 'cost']:
-#             if field in values and isinstance(values[field], Decimal):
-#                 values[field] = float(values[field])
-#         return values
+    class Config:
+        orm_mode = True
+        # This will allow FastAPI to automatically convert datetime to string
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),  # Converts datetime to ISO format string
+        }
 
-# class ProductCreate(ProductBase):
-#     pass
-
-# class ProductUpdate(ProductBase):
-#     price: Optional[Decimal] = None
-#     quantity: Optional[int] = None
-#     sku: Optional[str] = None
-#     slug: Optional[str] = None
-#     seo_title: Optional[str] = None
-#     seo_description: Optional[str] = None
-#     status: Optional[ProductStatus] = None
-
-# class ProductResponse(ProductBase):
-#     id: int
-#     created_at: datetime
-#     updated_at: Optional[datetime] = None
-#     deleted_at: Optional[datetime] = None
-
-#     class Config:
-#         orm_mode = True
-
+# Define ProductUpdate schema
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    short_description: Optional[str] = None
+    price: Optional[Decimal] = None
+    cost: Optional[Decimal] = None
+    quantity: Optional[int] = None
+    sku: Optional[str] = None
+    slug: Optional[str] = None
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+    status: Optional[str] = None
+        
 # # Product Variant Schemas
 # class ProductVariantBase(BaseModel):
 #     product_id: int

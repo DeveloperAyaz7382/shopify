@@ -25,7 +25,7 @@ app.add_middleware(
 
 # Include the routers for products, orders, and users
 app.include_router(users.router)
-# app.include_router(products.router)
+app.include_router(products.router)
 app.include_router(media.router, prefix="/media", tags=["media"])
 # app.include_router(product_variants_router)
 # app.include_router(orders.router)

@@ -40,7 +40,6 @@ class User(Base):
     )
 
 # Media Model
-
 class Media(Base):
     __tablename__ = "media"
     
@@ -50,14 +49,15 @@ class Media(Base):
     file_size = Column(Integer)
     file_type = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)  
-    
-    
-    
+
+    # Relationship to ProductVariant
+    product_variants = relationship("ProductVariant", back_populates="image")
+
 # Product Model
 class Product(Base):
     __tablename__ = 'products'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     description = Column(String)
     short_description = Column(String)
@@ -69,10 +69,10 @@ class Product(Base):
     seo_title = Column(String)
     seo_description = Column(String)
     status = Column(String, default="Draft")
+    created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    deleted_at = Column(DateTime, nullable=True)
 
-    # Relationship
+    # Relationship with ProductVariant
     variants = relationship("ProductVariant", back_populates="product")
 
     def __repr__(self):
@@ -100,7 +100,7 @@ class ProductVariant(Base):
     quantity = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    deleted_at = Column(DateTime, nullable=True)
+    deleted_at = Column(DateTime)
 
     # Relationships
     product = relationship("Product", back_populates="variants")
