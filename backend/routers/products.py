@@ -16,7 +16,7 @@ from database import get_db  # Dependency for getting the database session
 from crud import create_product  # Your function to handle product creation
 from crud import update_product  # Your CRUD function for updating a product
 
-router = APIRouter()
+router = APIRouter(prefix="/product", tags=["product"])
 
 # Dependency to get the DB session
 def get_db():
