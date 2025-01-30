@@ -6,12 +6,13 @@ from database import engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
 from routers import media
+from routers import product_variants
 
 
 # Create the database tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(title="E-commerce API")
 
 
 # Add CORS middleware
@@ -27,7 +28,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(products.router)
 app.include_router(media.router, prefix="/media", tags=["media"])
-# app.include_router(product_variants_router)
+app.include_router(product_variants.router)
 # app.include_router(orders.router)
 
 @app.get("/")

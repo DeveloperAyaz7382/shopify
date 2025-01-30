@@ -1,10 +1,10 @@
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr, Field, constr
 from typing import Optional, Dict
 from datetime import datetime
 from uuid import UUID
 from decimal import Decimal
 import enum
-
+from pydantic import BaseModel, condecimal, conint
 
 
 # User Schemas
@@ -105,49 +105,80 @@ class ProductUpdate(BaseModel):
     seo_title: Optional[str] = None
     seo_description: Optional[str] = None
     status: Optional[str] = None
-        
-# # Product Variant Schemas
+    
+    
+    
+#  # Schema definitions
 # class ProductVariantBase(BaseModel):
 #     product_id: int
 #     name: str
-#     sku: Optional[str]
-#     weight: Optional[float]
-#     option_1_name: Optional[str]
-#     option_1_value: Optional[str]
-#     option_2_name: Optional[str]
-#     option_2_value: Optional[str]
-#     option_3_name: Optional[str]
-#     option_3_value: Optional[str]
-#     price: float
-#     compare_price: Optional[float]
-#     continue_selling: Optional[bool] = False
-#     quantity: Optional[int] = 0
+#     sku: Optional[str] = None
+#     weight: Optional[float] = None
+#     option_1_name: Optional[str] = None
+#     option_1_value: Optional[str] = None
+#     option_2_name: Optional[str] = None
+#     option_2_value: Optional[str] = None
+#     option_3_name: Optional[str] = None
+#     option_3_value: Optional[str] = None
+#     price: float = Field(..., ge=0)
+#     compare_price: Optional[float] = None
+#     continue_selling: bool = False
+#     image_id: Optional[int] = None
+#     quantity: int = Field(0, ge=0)
 
 # class ProductVariantCreate(ProductVariantBase):
 #     pass
 
 # class ProductVariantUpdate(BaseModel):
-#     name: Optional[str]
-#     sku: Optional[str]
-#     weight: Optional[float]
-#     option_1_name: Optional[str]
-#     option_1_value: Optional[str]
-#     option_2_name: Optional[str]
-#     option_2_value: Optional[str]
-#     option_3_name: Optional[str]
-#     option_3_value: Optional[str]
-#     price: Optional[float]
-#     compare_price: Optional[float]
-#     continue_selling: Optional[bool]
-#     quantity: Optional[int]
+#     name: Optional[str] = None
+#     sku: Optional[str] = None
+#     weight: Optional[float] = None
+#     option_1_name: Optional[str] = None
+#     option_1_value: Optional[str] = None
+#     option_2_name: Optional[str] = None
+#     option_2_value: Optional[str] = None
+#     option_3_name: Optional[str] = None
+#     option_3_value: Optional[str] = None
+#     price: Optional[float] = Field(None, ge=0)
+#     compare_price: Optional[float] = None
+#     continue_selling: Optional[bool] = None
+#     image_id: Optional[int] = None
+#     quantity: Optional[int] = Field(None, ge=0)
 
 # class ProductVariantResponse(ProductVariantBase):
 #     id: int
-#     created_at: datetime
-#     updated_at: datetime
-#     deleted_at: Optional[datetime]
+#     created_at: str
+#     updated_at: str
 
 #     class Config:
 #         orm_mode = True
 
 
+# ✅ Base Schema
+class ProductVariantBase(BaseModel):
+    name: str
+    sku: Optional[str] = None
+    weight: Optional[condecimal(max_digits=10, decimal_places=2)] = None
+    price: condecimal(max_digits=10, decimal_places=2)
+    options: Optional[Dict[str, str]] = None  # JSON for variant options
+    continue_selling: Optional[bool] = False
+    image_id: Optional[int] = None
+    quantity: conint(ge=0)
+
+# ✅ Schema for Creating a Product Variant
+class ProductVariantCreate(ProductVariantBase):
+    product_id: int
+
+# ✅ Schema for Updating a Product Variant
+class ProductVariantUpdate(ProductVariantBase):
+    pass
+
+# ✅ Schema for Returning Data
+class ProductVariantResponse(ProductVariantBase):
+    id: int
+    product_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

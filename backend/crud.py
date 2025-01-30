@@ -1,14 +1,14 @@
 # app/crud.py
 from typing import List
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from models import Media
-from schemas import MediaCreate, ProductBase
+from schemas import MediaCreate, ProductBase, ProductVariantCreate, ProductVariantUpdate
 from schemas import UserCreate, UserUpdate, UserResponse
 from models import User
 from models import Product
-
-
+from models import ProductVariant
 
 # CRUD  Users)
 def get_user(db: Session, user_id: int) -> User:
@@ -96,3 +96,72 @@ def delete_product(db: Session, product_id: int) -> bool:
         db.commit()
         return True
     return False
+
+
+
+# # CRUD operations
+# def get_product_variant(db: Session, variant_id: int):
+#     return db.query(ProductVariant).filter(ProductVariant.id == variant_id).first()
+
+# def get_all_product_variants(db: Session, skip: int = 0, limit: int = 10):
+#     return db.query(ProductVariant).offset(skip).limit(limit).all()
+
+# def create_product_variant(db: Session, variant: ProductVariantCreate):
+#     db_variant = ProductVariant(**variant.dict())
+#     db.add(db_variant)
+#     db.commit()
+#     db.refresh(db_variant)
+#     return db_variant
+
+# def update_product_variant(db: Session, variant_id: int, update_data: ProductVariantUpdate):
+#     db_variant = get_product_variant(db, variant_id)
+#     if not db_variant:
+#         raise HTTPException(status_code=404, detail="ProductVariant not found")
+#     for key, value in update_data.dict(exclude_unset=True).items():
+#         setattr(db_variant, key, value)
+#     db.commit()
+#     db.refresh(db_variant)
+#     return db_variant
+
+# def delete_product_variant(db: Session, variant_id: int):
+#     db_variant = get_product_variant(db, variant_id)
+#     if not db_variant:
+#         raise HTTPException(status_code=404, detail="ProductVariant not found")
+#     db.delete(db_variant)
+#     db.commit()
+#     return {"detail": "ProductVariant deleted"}
+
+
+# ✅ Create a new product variant
+def create_product_variant(db: Session, variant_data: ProductVariantCreate):
+    variant = ProductVariant(**variant_data.dict())
+    db.add(variant)
+    db.commit()
+    db.refresh(variant)
+    return variant
+
+# ✅ Get all product variants
+def get_product_variants(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(ProductVariant).offset(skip).limit(limit).all()
+
+# ✅ Get a single product variant by ID
+def get_product_variant(db: Session, variant_id: int):
+    return db.query(ProductVariant).filter(ProductVariant.id == variant_id).first()
+
+# ✅ Update a product variant
+def update_product_variant(db: Session, variant_id: int, variant_data: ProductVariantUpdate):
+    variant = db.query(ProductVariant).filter(ProductVariant.id == variant_id).first()
+    if variant:
+        for key, value in variant_data.dict(exclude_unset=True).items():
+            setattr(variant, key, value)
+        db.commit()
+        db.refresh(variant)
+    return variant
+
+# ✅ Delete a product variant
+def delete_product_variant(db: Session, variant_id: int):
+    variant = db.query(ProductVariant).filter(ProductVariant.id == variant_id).first()
+    if variant:
+        db.delete(variant)
+        db.commit()
+    return variant

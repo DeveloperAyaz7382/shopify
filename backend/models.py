@@ -1,14 +1,12 @@
 from decimal import Decimal
 from typing import Text
 from sqlalchemy import DECIMAL, CheckConstraint, Column, BigInteger, LargeBinary, String, Numeric, Boolean, Integer, ForeignKey, DateTime, JSON, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 import enum
 import uuid
 from sqlalchemy import Text
-
 
 Base = declarative_base()
 
@@ -50,7 +48,7 @@ class Media(Base):
     file_type = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)  
 
-    # Relationship to ProductVariant
+    # Back reference to ProductVariant (NO delete-orphan)
     product_variants = relationship("ProductVariant", back_populates="image")
 
 # Product Model
@@ -73,43 +71,35 @@ class Product(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     # Relationship with ProductVariant
-    variants = relationship("ProductVariant", back_populates="product")
+    variants = relationship("ProductVariant", back_populates="product", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Product(name={self.name}, sku={self.sku})>"
 
-# ProductVariant Model
 class ProductVariant(Base):
     __tablename__ = "product_variants"
 
     id = Column(BigInteger, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey('products.id'))
+    product_id = Column(Integer, ForeignKey('products.id', ondelete="CASCADE"), nullable=False)
     name = Column(String(255), nullable=False)
-    sku = Column(String(255), nullable=True)
+    sku = Column(String(255), unique=True, nullable=True)  # Ensuring uniqueness for better SKU management
     weight = Column(Numeric(10, 2), nullable=True)
-    option_1_name = Column(String(255), nullable=True)
-    option_1_value = Column(String(255), nullable=True)
-    option_2_name = Column(String(255), nullable=True)
-    option_2_value = Column(String(255), nullable=True)
-    option_3_name = Column(String(255), nullable=True)
-    option_3_value = Column(String(255), nullable=True)
     price = Column(Numeric(10, 2), nullable=False)
-    compare_price = Column(Numeric(10, 2), nullable=True)
+    options = Column(JSON, nullable=True)  # Stores variant options like {"color": "red", "size": "M"}
     continue_selling = Column(Boolean, default=False)
     image_id = Column(BigInteger, ForeignKey("media.id", ondelete="SET NULL"), nullable=True)
     quantity = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    deleted_at = Column(DateTime)
 
     # Relationships
     product = relationship("Product", back_populates="variants")
-    image = relationship("Media", back_populates="product_variants")  # Added back_populates to Media
+    image = relationship("Media", back_populates="product_variants")
 
     __table_args__ = (
         CheckConstraint("quantity >= 0", name="product_variant_quantity_check"),
         CheckConstraint("price >= 0", name="product_variant_price_check"),
     )
 
-# Add back_populates for bidirectional relationship in Media
-Media.product_variants = relationship("ProductVariant", back_populates="image")
+    def __repr__(self):
+        return f"<ProductVariant(name={self.name}, sku={self.sku}, price={self.price})>"
