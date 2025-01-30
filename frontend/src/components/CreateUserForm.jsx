@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { createUser } from "../api/users";
+import { Form, Input, Select, Button, message } from "antd";
+
+const { Option } = Select;
 
 const CreateUserForm = ({ onUserCreated }) => {
   const [formData, setFormData] = useState({
@@ -12,21 +15,16 @@ const CreateUserForm = ({ onUserCreated }) => {
   });
 
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const handleChange = (value, key) => {
+    setFormData((prevData) => ({ ...prevData, [key]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
     setError(null);
-    setSuccess(false);
-
     try {
-      const newUser = await createUser(formData);
-      setSuccess(true);
+      const newUser = await createUser(values);
+      message.success("User created successfully!");
       setFormData({
         first_name: "",
         last_name: "",
@@ -38,78 +36,86 @@ const CreateUserForm = ({ onUserCreated }) => {
       if (onUserCreated) onUserCreated(newUser); // Notify parent component
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to create user");
+      message.error("Failed to create user");
     }
   };
 
   return (
     <div>
       <h2>Create New User</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>First Name:</label>
-          <input
-            type="text"
-            name="first_name"
+      <Form
+        name="createUserForm"
+        onFinish={handleSubmit}
+        initialValues={formData}
+        layout="vertical"
+      >
+        <Form.Item
+          label="First Name"
+          name="first_name"
+          rules={[{ required: true, message: "First name is required" }]}
+        >
+          <Input
             value={formData.first_name}
-            onChange={handleChange}
-            required
+            onChange={(e) => handleChange(e.target.value, "first_name")}
           />
-        </div>
-        <div>
-          <label>Last Name:</label>
-          <input
-            type="text"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Phone:</label>
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Role:</label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
-            <option value="Customer">Customer</option>
-            <option value="Admin">Admin</option>
-            <option value="Supplier">Supplier</option>
-            <option value="Staff">Staff</option>
-          </select>
-        </div>
-        <button type="submit">Create User</button>
-      </form>
+        </Form.Item>
 
-      {success && <p style={{ color: "green" }}>User created successfully!</p>}
+        <Form.Item label="Last Name" name="last_name">
+          <Input
+            value={formData.last_name}
+            onChange={(e) => handleChange(e.target.value, "last_name")}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Email"
+          name="email"
+          rules={[{ required: true, message: "Please input a valid email!" }]}
+        >
+          <Input
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleChange(e.target.value, "email")}
+          />
+        </Form.Item>
+
+        <Form.Item label="Phone" name="phone">
+          <Input
+            value={formData.phone}
+            onChange={(e) => handleChange(e.target.value, "phone")}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: "Password is required" }]}
+        >
+          <Input.Password
+            value={formData.password}
+            onChange={(e) => handleChange(e.target.value, "password")}
+          />
+        </Form.Item>
+
+        <Form.Item label="Role" name="role">
+          <Select
+            value={formData.role}
+            onChange={(value) => handleChange(value, "role")}
+          >
+            <Option value="Customer">Customer</Option>
+            <Option value="Admin">Admin</Option>
+            <Option value="Supplier">Supplier</Option>
+            <Option value="Staff">Staff</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit" block>
+            Create User
+          </Button>
+        </Form.Item>
+      </Form>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
