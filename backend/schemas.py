@@ -7,6 +7,7 @@ import enum
 from pydantic import BaseModel, condecimal, conint
 
 
+
 # User Schemas
 class UserCreate(BaseModel):
     first_name: str
